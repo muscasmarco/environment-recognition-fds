@@ -5,13 +5,41 @@
 import numpy as np
 import pandas as pd
 from glob import glob    
-
+import requests
+import os
+import zipfile
 
 class DatasetGetter:
     
-    def __init__(self, images_folder = "./dataset/images/", image_format = "jpg"):
+    def __init__(self, images_folder = "./dataset/images/", image_format = "jpg", download = False):
         self.images_folder = images_folder
         self.image_format = image_format
+        
+        if download:
+            dataset_link = "https://people.csail.mit.edu/torralba/code/spatialenvelope/spatial_envelope_256x256_static_8outdoorcategories.zip"
+            response = requests.get(dataset_link, stream=True)
+            
+            
+            try:
+                os.makedirs("./dataset/")
+            except FileExistsError:
+                print(images_folder + " already exists, skipping creation.")
+            
+            print("Downloading dataset...", end = '')
+            with open("./dataset/dataset.zip", "wb") as handle:
+                for data in response.iter_content():
+                    handle.write(data)
+            print("Done.")
+            
+            print("Extracting zip...", end = '')
+            with zipfile.ZipFile("./dataset/dataset.zip", 'r') as zip_ref:
+                zip_ref.extractall("./dataset/")
+            
+            os.rename("./dataset/spatial_envelope_256x256_static_8outdoorcategories/", "./dataset/images/")
+            
+            print("Done.")
+            
+        
         
     def get_dataframe(self, load_from_disk = True, save_to_disk = False, dataset_path = "./dataset/oliva_torralba_2001.csv", verbose = True):
         

@@ -18,9 +18,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 ''' GET DATASET '''
-dataset = DatasetGetter().get_dataframe()
-#dataset = dataset[:1000]
 
+download_dataset = False
+
+dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_disk = False)
+#dataset = dataset[:1000]
 
 
 ''' FEATURE EXTRACTION '''
@@ -32,7 +34,7 @@ y = dataset.label.values
 
 
 ''' FEATURE MAPPING '''
-fm = FeatureMapper(num_features = 1500, method = 'minibatch_kmeans', batch_size = 256)
+fm = FeatureMapper(num_features = 2000, method = 'minibatch_kmeans', batch_size = 512)
 fm.fit(descriptors)
 X_BoVW = fm.to_bag_of_visual_words(X)
 
