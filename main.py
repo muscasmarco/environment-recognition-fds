@@ -20,9 +20,8 @@ import seaborn as sns
 ''' GET DATASET '''
 
 download_dataset = False
-
 dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_disk = False)
-#dataset = dataset[:1000]
+
 
 
 ''' FEATURE EXTRACTION '''
