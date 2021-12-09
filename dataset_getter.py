@@ -41,7 +41,7 @@ class DatasetGetter:
             
         
         
-    def get_dataframe(self, load_from_disk = True, save_to_disk = False, dataset_path = "./dataset/oliva_torralba_2001.csv", verbose = True):
+    def get_dataframe(self, load_from_disk = True, save_to_disk = True, dataset_path = "./dataset/oliva_torralba_2001.csv", verbose = True):
         
         dataframe = None
         

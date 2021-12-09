@@ -50,27 +50,9 @@ class FeatureMapper:
             
             prediction = self.mapper.predict(X[i])
             
-            if cumulative:
+            if cumulative: # Another version, for now it's in testing
                 X_BoVW[i][prediction] += 1
             else:
                 X_BoVW[i][prediction] = 1
             
         return X_BoVW
-                
-        
-'''
-n_clusters = 1000
-batch_size = 256
-
-mb_kmeans = MiniBatchKMeans(n_clusters = n_clusters, batch_size = batch_size)
-
-mb_kmeans.fit(X_all_descriptors)
-
-X_BoVW = np.zeros(shape = (len(X), n_clusters))
-
-for i in range(len(X)):
-    
-    prediction = mb_kmeans.predict(X[i])
-    
-    X_BoVW[i][prediction] = 1
-'''

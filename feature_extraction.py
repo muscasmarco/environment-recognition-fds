@@ -37,17 +37,17 @@ class FeatureExtractor:
         
     def _orb_extract(self, image_paths):
         pass
-        X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For classification
-        X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering
+        X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For feature mapping of individual images
+        X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering of features
     
-        orb = cv.ORB_create()
+        orb = cv.ORB_create() # Declaration of the keypoint detector
     
         for image_path in image_paths:
             
-            image = cv.imread(image_path)
-            greyscale = cv.cvtColor(image, code = cv.COLOR_BGR2GRAY)
+            image = cv.imread(image_path) # Read the image from disk 
+            greyscale = cv.cvtColor(image, code = cv.COLOR_BGR2GRAY) # Needs greyscale
             
-            _ , descriptors = orb.detectAndCompute(greyscale, None)
+            _ , descriptors = orb.detectAndCompute(greyscale, None) # The keypoints are not useful for prediction, just get the descriptors
             
             X.append(descriptors)
             X_all_descriptors.extend(descriptors)
@@ -60,8 +60,8 @@ class FeatureExtractor:
     def _sift_extract(self, image_paths):
         pass
     
-        X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For classification
-        X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering
+        X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For feature mapping of individual images
+        X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering of features
     
         sift = cv.SIFT_create()
     

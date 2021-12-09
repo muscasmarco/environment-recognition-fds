@@ -19,7 +19,7 @@ import seaborn as sns
 
 ''' GET DATASET '''
 
-download_dataset = False
+download_dataset = False # The repository does not contain the dataset, make sure to download it! (then set this to false)
 dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_disk = False)
 
 
@@ -34,26 +34,26 @@ y = dataset.label.values
 
 ''' FEATURE MAPPING '''
 fm = FeatureMapper(num_features = 2000, method = 'minibatch_kmeans', batch_size = 512)
-fm.fit(descriptors)
-X_BoVW = fm.to_bag_of_visual_words(X)
+fm.fit(descriptors) # Make the clusters to later build the BoVW
+X_BoVW = fm.to_bag_of_visual_words(X) # And here we build the feature maps through clustering
 
 
 
 ''' PREDICTION '''
-train_size = 0.7 # Size in percentage of the training split
+train_size = 0.8 # Size in percentage of the training split
 X_train, X_test, y_train, y_test = train_test_split(X_BoVW,y, train_size = train_size, stratify = y)
 
-logistic_regression = LogisticRegression(max_iter = 1000)
-logistic_regression.fit(X_train, y_train)
-y_test_predictions = logistic_regression.predict(X_test)
+logistic_regression = LogisticRegression(max_iter = 1000) # Declare the model
+logistic_regression.fit(X_train, y_train) # Fit the training data
+y_test_predictions = logistic_regression.predict(X_test) # Make predictions
 
 
 
 
 ''' EVALUATION '''
 
-acc_score = accuracy_score(y_test_predictions,  y_test)
-conf_matrix = confusion_matrix(y_test, y_test_predictions)
+acc_score = accuracy_score(y_test_predictions,  y_test) # Calculate the accuracy 
+conf_matrix = confusion_matrix(y_test, y_test_predictions) # Create a confusion matrix
 
 # Credit to blog.finxter.com for setting up a nice looking and interpretable confusion matrix plot
 plt.figure(0, figsize = (15, 15))
