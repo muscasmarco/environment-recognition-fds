@@ -7,7 +7,7 @@ import numpy as np
 class FeatureExtractor:
     
     
-    __supported_methods = ['orb', 'sift']
+    __supported_methods = ['orb', 'sift', 'rgb', 'hsv']
 
     def __init__(self, method = 'orb'): # Methods are 'orb', 'sift'
         
@@ -29,6 +29,12 @@ class FeatureExtractor:
             
         if self.method == 'sift':
             result = self._sift_extract(image_paths)
+        
+        if self.method == 'rgb':
+            result = self._rgb_hists_extract(image_paths)
+        
+        if self.method == 'hsv':
+            result = self._hsv_hists_extract(image_paths)
         
         if verbose:
             print("Done.")
@@ -77,4 +83,72 @@ class FeatureExtractor:
     
         X_all_descriptors = np.array(X_all_descriptors)
         return X, X_all_descriptors
+    
+    def _rgb_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+        pass
+    
+        X = []
+        X_all_hists = [] 
+    
+    
+        for image_path in image_paths:
+            
+            
+            ### YOUR CODE HERE ###
+            
+            image = ... # Load image from path here as a np.array
+            hist = ... # Declare the hist here also as np.array
+            
+            
+            
+            
+            
+            
+            if normalize: # Normalize the hists
+                pass 
+                
+            
+            
+            ### END YOUR CODE ###
+            
+            X.append(hist)
+            X_all_hists.append(hist)
+    
+        X_all_hists = np.array(X_all_hists)
+        return X, X_all_hists
+    
+    
+    def _hsv_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+        pass
+    
+        X = []
+        X_all_hists = [] 
+    
+    
+        for image_path in image_paths:
+            
+            
+            ### YOUR CODE HERE ###
+            
+            image = ... # Load image from path here as a np.array
+            hist = ... # Declare the hist here also as np.array
+            
+            
+            
+            
+            
+            
+            if normalize: # Normalize the hists
+                pass 
+                
+            
+            
+            ### END YOUR CODE ###
+            
+            X.append(hist)
+            X_all_hists.append(hist)
+    
+        X_all_hists = np.array(X_all_hists)
+        return X, X_all_hists
+    
     
