@@ -5,8 +5,6 @@ import cv2 as cv
 import numpy as np
 
 class FeatureExtractor:
-    
-    
     __supported_methods = ['orb', 'sift']
 
     def __init__(self, method = 'orb'): # Methods are 'orb', 'sift'
@@ -64,9 +62,8 @@ class FeatureExtractor:
         X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering of features
     
         sift = cv.SIFT_create()
-    
+
         for image_path in image_paths:
-            
             image = cv.imread(image_path)
             greyscale = cv.cvtColor(image, code = cv.COLOR_BGR2GRAY)
             
@@ -74,7 +71,7 @@ class FeatureExtractor:
             
             X.append(descriptors)
             X_all_descriptors.extend(descriptors)
-    
+
         X_all_descriptors = np.array(X_all_descriptors)
         return X, X_all_descriptors
     

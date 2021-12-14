@@ -58,7 +58,7 @@ conf_matrix = confusion_matrix(y_test, y_test_predictions) # Create a confusion 
 # Credit to blog.finxter.com for setting up a nice looking and interpretable confusion matrix plot
 plt.figure(0, figsize = (15, 15))
 
-ax = sns.heatmap(conf_matrix, annot=True, fmt='g');
+ax = sns.heatmap(conf_matrix, annot=True, fmt='g')
 
 conf_matrix_title = str("Confusion matrix | Accuracy %.2f" % acc_score)
 ax.set_title(conf_matrix_title)

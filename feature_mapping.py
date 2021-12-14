@@ -21,11 +21,9 @@ class FeatureMapper:
         
     def fit(self, X, verbose = True):
         
-        
         if verbose:
             print("Mapping the descriptors to feature space...", end = '')
 
-        
         self.mapper = None
         
         if self.method == 'kmeans':
@@ -33,8 +31,7 @@ class FeatureMapper:
             
         if self.method == 'minibatch_kmeans':
             self.mapper = MiniBatchKMeans(n_clusters = self.num_features, batch_size = self.batch_size)
-        
-        
+
         self.mapper.fit(X)
         
         if verbose:

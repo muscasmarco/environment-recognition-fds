@@ -1,5 +1,9 @@
 # Custom folders to be ignored
 dataset/
+log/
+
+# Pycharm
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
