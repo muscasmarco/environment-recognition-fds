@@ -138,7 +138,7 @@ class Executor:
 
         self._extract_features(pars["extract_method"])
         self._map_features(pars["mapping_method"], pars["mapping_feature_size"], pars["mapping_batch_size"])
-        self._predict(pars["predict_max_iter"])
+        self._predict(pars["predict_maxiter"])
         self._evaluate()
 
         return {
@@ -161,8 +161,8 @@ def parameter_search():
         "extract_method": ["sift"],
         "mapping_method": ["minibatch_kmeans"],
         "mapping_batch_size": [512],
-        "mapping_feature_size": [2000],
-        "predict_maxiter": [1000]
+        "mapping_feature_size": [200],
+        "predict_maxiter": [2000]
     }
 
     # Setup Grid
@@ -170,9 +170,9 @@ def parameter_search():
     grid.add("extract_method", ["orb", "sift"])
     grid.add("mapping_method", ["kmeans", "minibatch_kmeans"])
     grid.add("mapping_batch_size", [512])
-    grid.add("mapping_feature_size", [2000])
+    grid.add("mapping_feature_size", [200])
     grid.add("predict_method", ["log-regr"])
-    grid.add("predict_maxiter", [1000])
+    grid.add("predict_maxiter", [2000])
     print(grid)
     print("Size: " + str(len(grid)))
 
@@ -226,7 +226,7 @@ def parameter_search():
 
                 with open("log/" + folder + "/info.txt", "w") as info:
                     for acc, name in sorted(results_list, reverse=True):
-                        info.write("ACC: {}\t{}\n".format(acc, name))
+                        info.write("ACC: {}\t{}\n{}\n\n".format(acc, name, pack))
 
                 break
             except Exception as e:
