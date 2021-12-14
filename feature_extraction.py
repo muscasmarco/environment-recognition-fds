@@ -13,11 +13,16 @@ class FeatureExtractor:
             raise Exception("Feature extraction method not supported. We support ", self.__supported_methods)
     
         self.method = method
+
+        self.results = {}
         
     
     def extract(self, image_paths, verbose = True):
         
         result = None
+
+        if self.results.get(self.method, None) is not None:
+            return self.results[self.method]
         
         if verbose:        
             print("Extracting the image descriptors...", end = '')
@@ -27,6 +32,8 @@ class FeatureExtractor:
             
         if self.method == 'sift':
             result = self._sift_extract(image_paths)
+
+        self.results[self.method] = result
         
         if verbose:
             print("Done.")

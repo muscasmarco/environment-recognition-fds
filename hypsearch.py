@@ -10,7 +10,8 @@ from feature_extraction import FeatureExtractor
 from feature_mapping import FeatureMapper
 
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 
 class Grid:
@@ -124,12 +125,20 @@ class Executor:
         fm.fit(self.descriptors)  # Make the clusters to later build the BoVW
         self.X_BoVW = fm.to_bag_of_visual_words(self.X)  # And here we build the feature maps through clustering
 
-    def _predict(self, max_iter=1000):
+    def _predict(self, max_iter=1000, predict_method="log-regr"):
         train_size = 0.8  # Size in percentage of the training split
         X_train, X_test, y_train, self.y_test = train_test_split(self.X_BoVW, self.y, train_size=train_size, stratify=self.y)
-        logistic_regression = LogisticRegression(max_iter=max_iter)  # Declare the model
-        logistic_regression.fit(X_train, y_train)  # Fit the training data
-        self.y_test_predictions = logistic_regression.predict(X_test)  # Make predictions
+
+        available_models = {
+            "log-regr": LogisticRegression(max_iter=max_iter),
+            "lin-regr": LinearRegression(),
+            "ridge": Ridge(),
+            "svm": SVC(),
+        }
+
+        model = available_models[predict_method]
+        model.fit(X_train, y_train)  # Fit the training data
+        self.y_test_predictions = model.predict(X_test)  # Make predictions
 
     def _evaluate(self):
         self.acc_score = accuracy_score(self.y_test_predictions, self.y_test)  # Calculate the accuracy
@@ -158,22 +167,23 @@ def parameter_search():
     folder = args.folder
 
     pars = {
-        "extract_method": ["sift"],
-        "mapping_method": ["minibatch_kmeans"],
-        "mapping_batch_size": [512],
-        "mapping_feature_size": [200],
-        "predict_maxiter": [2000]
+        "extract_method": "sift",
+        "mapping_method": "minibatch_kmeans",
+        # "mapping_batch_size": 512,
+        # "mapping_feature_size": 200,
+        # "predict_method": "log-regr",
+        "predict_maxiter": 2000
     }
 
     # Setup Grid
     grid = Grid()
-    grid.add("extract_method", ["orb", "sift"])
-    grid.add("mapping_method", ["kmeans", "minibatch_kmeans"])
-    grid.add("mapping_batch_size", [512])
-    grid.add("mapping_feature_size", [200])
-    grid.add("predict_method", ["log-regr"])
-    grid.add("predict_maxiter", [2000])
+    # grid.add("extract_method", ["sift"])
+    grid.add("mapping_batch_size", [128, 256, 512])
+    grid.add("mapping_feature_size", [100, 200, 400])
+    grid.add("predict_method", ["lin-regr", "log-regr", "svm", "ridge"])
+    # grid.add("predict_maxiter", [2000])
     print(grid)
+
     print("Size: " + str(len(grid)))
 
 
@@ -222,11 +232,12 @@ def parameter_search():
 
                 last_answer = executor.run(pars)
 
-                results_list.append((last_answer.get('acc'), filename))
+                results_list.append(((last_answer.get('acc'), pack), filename))
 
                 with open("log/" + folder + "/info.txt", "w") as info:
-                    for acc, name in sorted(results_list, reverse=True):
-                        info.write("ACC: {}\t{}\n{}\n\n".format(acc, name, pack))
+                    for entry, name in sorted(results_list, reverse=True, key=lambda etr: etr[0]):
+                        acc, used_pars = entry
+                        info.write("ACC: {}\t{}\n{}\n\n".format(acc, name, used_pars))
 
                 break
             except Exception as e:
