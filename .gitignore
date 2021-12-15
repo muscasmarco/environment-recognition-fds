@@ -1,5 +1,12 @@
 # Custom folders to be ignored
 dataset/
+log/
+temp/
+
+# Pycharm
+.idea/
+
+*.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
