@@ -1,6 +1,7 @@
 # Custom folders to be ignored
 dataset/
 log/
+temp/
 
 # Pycharm
 .idea/

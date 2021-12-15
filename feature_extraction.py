@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os
+import pickle
 
 import cv2 as cv
 import numpy as np
@@ -7,33 +9,44 @@ import numpy as np
 class FeatureExtractor:
     __supported_methods = ['orb', 'sift']
 
-    def __init__(self, method = 'orb'): # Methods are 'orb', 'sift'
+    def __init__(self, image_paths): # Methods are 'orb', 'sift'
+        self.image_paths = image_paths
+        self.results = {}
+
+        try:
+            with open("temp/feature_extr.pickle", "rb") as input_file:
+                self.results = pickle.load(input_file)
+            print("Stored image keypoints loaded")
+        except: pass
         
+    
+    def extract(self, method, verbose = True):
+
         if method not in self.__supported_methods:
             raise Exception("Feature extraction method not supported. We support ", self.__supported_methods)
-    
-        self.method = method
 
-        self.results = {}
-        
-    
-    def extract(self, image_paths, verbose = True):
-        
+        if self.results.get(method, None) is not None:
+            return self.results[method]
+
         result = None
 
-        if self.results.get(self.method, None) is not None:
-            return self.results[self.method]
-        
         if verbose:        
             print("Extracting the image descriptors...", end = '')
 
-        if self.method == 'orb':
-            result = self._orb_extract(image_paths)
+        if method == 'orb':
+            result = self._orb_extract(self.image_paths)
             
-        if self.method == 'sift':
-            result = self._sift_extract(image_paths)
+        if method == 'sift':
+            result = self._sift_extract(self.image_paths)
 
-        self.results[self.method] = result
+        self.results[method] = result
+
+        # try:
+        os.makedirs("./temp/", exist_ok=True)
+        with open("temp/feature_extr.pickle", "wb") as output_file:
+            pickle.dump(self.results, output_file , pickle.HIGHEST_PROTOCOL)
+        print("Stored features updated")
+        # except: pass
         
         if verbose:
             print("Done.")

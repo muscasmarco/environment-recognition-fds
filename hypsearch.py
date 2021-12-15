@@ -1,18 +1,23 @@
+import pickle
 import time
 import traceback
 import sys, os
 import argparse
+import numpy as np
 
 import ast
 
 from dataset_getter import DatasetGetter
 from feature_extraction import FeatureExtractor
 from feature_mapping import FeatureMapper
+from prediction import Predictor
 
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+
 from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
+
 
 class Grid:
     def __init__(self):
@@ -103,51 +108,58 @@ class Grid:
             filename += str(key)[:4] + "_" + str(pack[key]) + "_"
         return "run_" + str(abs(hash(filename)))[:6]
 
+
+def onehot_encode(labels):
+    classes = np.sort(np.unique(labels))
+    return np.array([np.where(classes == label)[0][0] for label in labels])
+
 class Executor:
+    __train_split = 0.6  # Size in percentage of the training split
+    __max_iter = 2000 # max iteration until convergence in prediction
+
     def __init__(self, dataset):
         self.dataset = dataset
+        self.feature_extractor = FeatureExtractor(dataset.image_path.values)
+        self.feature_mapper = FeatureMapper()
+        self.predictor = Predictor(self.__train_split, self.__max_iter)
+
         self.X = None
-        self.y = None
+        self.y = self.dataset.label.values
         self.descriptors = None
         self.X_BoVW = None
         self.y_test = None
         self.y_test_predictions = None
         self.acc_score = None
-        self.pars = None
 
-    def _extract_features(self, extract_method):
-        fe = FeatureExtractor(method=extract_method)
-        self.X, self.descriptors = fe.extract(self.dataset.image_path.values)
-        self.y = self.dataset.label.values
+    def _extract_features(self, pars):
+        self.X, self.descriptors = self.feature_extractor.extract(
+            method=pars["extract_method"]
+        )
 
-    def _map_features(self, mapping_method='minibatch_kmeans', feature_size=2000, batch_size=512):
-        fm = FeatureMapper(num_features=feature_size, method=mapping_method, batch_size=batch_size)
-        fm.fit(self.descriptors)  # Make the clusters to later build the BoVW
-        self.X_BoVW = fm.to_bag_of_visual_words(self.X)  # And here we build the feature maps through clustering
+    def _map_features(self, pars):
+        self.feature_mapper.set_params(
+            method=pars["mapping_method"],
+            num_features=pars["mapping_feature_size"],
+            batch_size=pars["mapping_batch_size"],
+        )
+        self.feature_mapper.fit(self.descriptors)  # Make the clusters to later build the BoVW
+        self.X_BoVW = self.feature_mapper.to_bag_of_visual_words(
+            self.X,
+            # cumulative=pars["cumulative_BoVW"]
+        )  # And here we build the feature maps through clustering
 
-    def _predict(self, max_iter=1000, predict_method="log-regr"):
-        train_size = 0.8  # Size in percentage of the training split
-        X_train, X_test, y_train, self.y_test = train_test_split(self.X_BoVW, self.y, train_size=train_size, stratify=self.y)
-
-        available_models = {
-            "log-regr": LogisticRegression(max_iter=max_iter),
-            "lin-regr": LinearRegression(),
-            "ridge": Ridge(),
-            "svm": SVC(),
-        }
-
-        model = available_models[predict_method]
-        model.fit(X_train, y_train)  # Fit the training data
-        self.y_test_predictions = model.predict(X_test)  # Make predictions
+    def _predict(self, pars):
+        self.y_test_predictions, self.y_test = self.predictor.predict(
+            self.X_BoVW, self.y, pars['predict_method']
+        )
 
     def _evaluate(self):
         self.acc_score = accuracy_score(self.y_test_predictions, self.y_test)  # Calculate the accuracy
 
     def run(self, pars):
-
-        self._extract_features(pars["extract_method"])
-        self._map_features(pars["mapping_method"], pars["mapping_feature_size"], pars["mapping_batch_size"])
-        self._predict(pars["predict_maxiter"])
+        self._extract_features(pars)
+        self._map_features(pars)
+        self._predict(pars)
         self._evaluate()
 
         return {
@@ -161,8 +173,6 @@ def parameter_search():
     # parse command line arguments
     parser = argparse.ArgumentParser(description="Parser for Parameter Search arguments")
     parser.add_argument("--folder", type=str, default="parsearch", help="The folder in which the results are stored")
-    parser.add_argument("--dataset", type=str, default='QSAR', help="The used dataset. 'QSAR' or 'MNIST'")
-    parser.add_argument("--method", type=str, default='tempens', help="The used method. 'pimodel' or 'tempens'")
     args = parser.parse_args()
     folder = args.folder
 
@@ -172,7 +182,6 @@ def parameter_search():
         # "mapping_batch_size": 512,
         # "mapping_feature_size": 200,
         # "predict_method": "log-regr",
-        "predict_maxiter": 2000
     }
 
     # Setup Grid
@@ -180,8 +189,8 @@ def parameter_search():
     # grid.add("extract_method", ["sift"])
     grid.add("mapping_batch_size", [128, 256, 512])
     grid.add("mapping_feature_size", [100, 200, 400])
-    grid.add("predict_method", ["lin-regr", "log-regr", "svm", "ridge"])
-    # grid.add("predict_maxiter", [2000])
+    grid.add("cumulative_BoVW", [True, False])
+    grid.add("predict_method", ["log-regr", "svm", "ridge"]) # lin-regr",
     print(grid)
 
     print("Size: " + str(len(grid)))
@@ -217,6 +226,8 @@ def parameter_search():
         runnr += 1
         pars = {**pars, **pack}
 
+        print("Using parameter pack: ", pack)
+
         filename = Grid.generate_filename(pack)
 
         log_file = log_dir + '/log_' + filename + ".txt"
@@ -234,7 +245,13 @@ def parameter_search():
 
                 results_list.append(((last_answer.get('acc'), pack), filename))
 
-                with open("log/" + folder + "/info.txt", "w") as info:
+                with open(model_dir + "/all_results.pickle", "wb") as f:
+                    pickle.dump(results_list, f, pickle.HIGHEST_PROTOCOL)
+
+                with open("log/" + folder + "/all.txt", "w") as info:
+                    info.write("ACC: {}\t{}\n{}\n\n".format(last_answer.get('acc'), filename, pack))
+
+                with open("log/" + folder + "/all_ordered.txt", "w") as info:
                     for entry, name in sorted(results_list, reverse=True, key=lambda etr: etr[0]):
                         acc, used_pars = entry
                         info.write("ACC: {}\t{}\n{}\n\n".format(acc, name, used_pars))
