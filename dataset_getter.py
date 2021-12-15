@@ -41,7 +41,7 @@ class DatasetGetter:
             
         
         
-    def get_dataframe(self, load_from_disk = True, save_to_disk = True, dataset_path = "./dataset/oliva_torralba_2001.csv", verbose = True):
+    def get_dataframe(self, balanced = True, shuffle = True, load_from_disk = False, save_to_disk = True, dataset_path = "./dataset/oliva_torralba_2001.csv", verbose = True):
         
         dataframe = None
         
@@ -63,6 +63,13 @@ class DatasetGetter:
             
         else:
             dataframe = pd.read_csv(dataset_path)
-            
+        
+        if balanced:
+            # Thanks to Samuel Nde, StackOverflow for providing a balancing by label method
+            groups = dataframe.groupby('label')
+            dataframe = pd.DataFrame(groups.apply(lambda x: x.sample(groups.size().min()).reset_index(drop=True)))
+
+        if shuffle:
+            dataframe = dataframe.sample(frac = 1)
         
         return dataframe

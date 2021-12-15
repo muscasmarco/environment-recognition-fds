@@ -7,7 +7,7 @@ import cv2 as cv
 import numpy as np
 
 class FeatureExtractor:
-    __supported_methods = ['orb', 'sift']
+    __supported_methods = ['orb', 'sift', 'rgb', 'hsv']
 
     def __init__(self, image_paths): # Methods are 'orb', 'sift'
         self.image_paths = image_paths
@@ -39,14 +39,20 @@ class FeatureExtractor:
         if method == 'sift':
             result = self._sift_extract(self.image_paths)
 
+        if method == 'rgb':
+            result = self._rgb_hists_extract(self.image_paths)
+
+        if method == 'hsv':
+            result = self._hsv_hists_extract(self.image_paths)
+
         self.results[method] = result
 
-        # try:
-        os.makedirs("./temp/", exist_ok=True)
-        with open("temp/feature_extr.pickle", "wb") as output_file:
-            pickle.dump(self.results, output_file , pickle.HIGHEST_PROTOCOL)
-        print("Stored features updated")
-        # except: pass
+        try:
+            os.makedirs("./temp/", exist_ok=True)
+            with open("temp/feature_extr.pickle", "wb") as output_file:
+                pickle.dump(self.results, output_file , pickle.HIGHEST_PROTOCOL)
+            print("Stored features updated")
+        except: pass
         
         if verbose:
             print("Done.")
@@ -94,4 +100,71 @@ class FeatureExtractor:
 
         X_all_descriptors = np.array(X_all_descriptors)
         return X, X_all_descriptors
+    
+    
+    
+    
+    
+    def _rgb_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+        pass
+            
+        X = []
+        X_all_hists = [] 
+        
+        
+        for image_path in image_paths:
+            
+            image = cv.imread(image_path) # Load image from path here as a np.array (G,B,R due to opencv imread)
+            bgr_planes = cv.split(image)
+            
+            # Thanks to opencv documentation we know how to build the histograms for each channel.
+            b_hist = cv.calcHist(bgr_planes, [0], None, [num_bins], (0, 256), accumulate = False)
+            g_hist = cv.calcHist(bgr_planes, [1], None, [num_bins], (0, 256), accumulate = False)
+            r_hist = cv.calcHist(bgr_planes, [2], None, [num_bins], (0, 256), accumulate = False)
+            
+            hist = np.concatenate((r_hist, g_hist, b_hist))
+            
+            if normalize: # Normalize the hists
+                hist = hist / hist.max()
+            
+            hist = hist.reshape(hist.size)
+            
+            X.append(hist)
+            X_all_hists.append(hist)
+            
+    
+        X_all_hists = np.array(X_all_hists)
+        return X, X_all_hists
+    
+    
+    def _hsv_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+        pass
+    
+        X = []
+        X_all_hists = [] 
+    
+        for image_path in image_paths:
+            
+            image = cv.imread(image_path) # Load image from path here as a np.array (G,B,R due to opencv imread)
+            image = cv.cvtColor(image, cv.COLOR_BGR2HSV) # Conversion to HSV image
+            hsv_planes = cv.split(image) # Splitting into HSV channels
+            
+            h_hist = cv.calcHist(hsv_planes, [0], None, [num_bins], (0, 256), accumulate = False)
+            s_hist = cv.calcHist(hsv_planes, [1], None, [num_bins], (0, 256), accumulate = False)
+            v_hist = cv.calcHist(hsv_planes, [2], None, [num_bins], (0, 256), accumulate = False)
+            
+            hist = np.concatenate((h_hist, s_hist, v_hist))
+            
+            if normalize: # Normalize the hists
+                hist = hist / hist.max()
+            
+            hist = hist.reshape(hist.size)
+
+            
+            X.append(hist)
+            X_all_hists.append(hist)
+            
+    
+        X_all_hists = np.array(X_all_hists)
+        return X, X_all_hists
     

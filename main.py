@@ -20,7 +20,7 @@ import seaborn as sns
 ''' GET DATASET '''
 
 download_dataset = False # The repository does not contain the dataset, make sure to download it! (then set this to false)
-dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_disk = False)
+dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_disk = False, balanced = True, shuffle = True)
 
 
 
