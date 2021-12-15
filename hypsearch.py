@@ -114,12 +114,13 @@ def onehot_encode(labels):
     return np.array([np.where(classes == label)[0][0] for label in labels])
 
 class Executor:
-    __train_split = 0.6  # Size in percentage of the training split
+    __train_split = 0.8  # Size in percentage of the training split
     __max_iter = 2000 # max iteration until convergence in prediction
 
     def __init__(self, dataset):
         self.dataset = dataset
-        self.feature_extractor = FeatureExtractor(dataset.image_path.values)
+        self.image_paths = dataset.image_path.values
+        self.feature_extractor = FeatureExtractor(self.image_paths)
         self.feature_mapper = FeatureMapper()
         self.predictor = Predictor(self.__train_split, self.__max_iter)
 
@@ -132,9 +133,7 @@ class Executor:
         self.acc_score = None
 
     def _extract_features(self, pars):
-        self.X, self.descriptors = self.feature_extractor.extract(
-            method=pars["extract_method"]
-        )
+        self.X, self.descriptors = self.feature_extractor.extract(self.image_paths, method=pars["extract_method"])
 
     def _map_features(self, pars):
         self.feature_mapper.set_params(
@@ -149,7 +148,7 @@ class Executor:
         )  # And here we build the feature maps through clustering
 
     def _predict(self, pars):
-        self.y_test_predictions, self.y_test = self.predictor.predict(
+        self.y_test_predictions, self.y_test = self.predictor.fit(
             self.X_BoVW, self.y, pars['predict_method']
         )
 
@@ -157,14 +156,22 @@ class Executor:
         self.acc_score = accuracy_score(self.y_test_predictions, self.y_test)  # Calculate the accuracy
 
     def run(self, pars):
+        self.pars = pars
         self._extract_features(pars)
         self._map_features(pars)
         self._predict(pars)
         self._evaluate()
 
         return {
-            "acc": self.acc_score
+            "valid-acc": self.acc_score
         }
+    
+    def predict(self, X, pars):
+        X, _ = self.feature_extractor.extract(X, method=pars["extract_method"])
+        X_BoVW = self.feature_mapper.to_bag_of_visual_words(X)
+        
+        return self.predictor.predict(X_BoVW, pars['predict_method'])
+    
 
 def parameter_search():
     print("*** Parameter Search ***")
@@ -189,7 +196,7 @@ def parameter_search():
     # grid.add("extract_method", ["sift"])
     grid.add("mapping_batch_size", [128, 256, 512])
     grid.add("mapping_feature_size", [100, 200, 400])
-    grid.add("cumulative_BoVW", [True, False])
+    grid.add("cumulative_BoVW", [False]) #[True, False])
     grid.add("predict_method", ["log-regr", "svm", "ridge"]) # lin-regr",
     print(grid)
 
@@ -242,20 +249,21 @@ def parameter_search():
                 print("start with " + filename)
 
                 last_answer = executor.run(pars)
-
-                results_list.append(((last_answer.get('acc'), pack), filename))
+                
+                print("\n Validation accuracy: %.2f \n" % last_answer['valid-acc'])
+                
+                results_list.append(((last_answer.get('valid-acc'), pack), filename))
 
                 with open(model_dir + "/all_results.pickle", "wb") as f:
                     pickle.dump(results_list, f, pickle.HIGHEST_PROTOCOL)
 
                 with open("log/" + folder + "/all.txt", "a") as info:
-                    info.write("ACC: {}\t{}\n{}\n\n".format(last_answer.get('acc'), filename, pack))
-
+                    info.write("ACC: {}\t{}\n{}\n\n".format(last_answer.get('valid-acc'), filename, pack))
+                    
                 with open("log/" + folder + "/all_ordered.txt", "w") as info:
                     for entry, name in sorted(results_list, reverse=True, key=lambda etr: etr[0]):
                         acc, used_pars = entry
                         info.write("ACC: {}\t{}\n{}\n\n".format(acc, name, used_pars))
-
                 break
             except Exception as e:
                 print(e)

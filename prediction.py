@@ -13,9 +13,11 @@ class Predictor:
             "ridge": RidgeClassifier(),
             "svm": SVC(),
         }
+        
+        self.trained_models = {}
 
 
-    def predict(self, X_BoVW, target, method):
+    def fit(self, X_BoVW, target, method):
         model = self.available_models[method]
         X_train, X_test, y_train, y_test = train_test_split(
             X_BoVW,
@@ -24,4 +26,14 @@ class Predictor:
             stratify=target
         )
         model.fit(X_train, y_train)  # Fit the training data
+        
+        self.trained_models[method] = model
+        
         return model.predict(X_test), y_test  # Make predictions
+    
+    
+    def predict(self, X, method):
+        
+        model = self.trained_models[method]
+        
+        return model.predict(X)

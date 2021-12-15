@@ -9,24 +9,26 @@ import numpy as np
 class FeatureExtractor:
     __supported_methods = ['orb', 'sift', 'rgb', 'hsv']
 
-    def __init__(self, image_paths): # Methods are 'orb', 'sift'
+    def __init__(self, image_paths, load_from_disk = False): # Methods are 'orb', 'sift'
         self.image_paths = image_paths
         self.results = {}
-
-        try:
-            with open("temp/feature_extr.pickle", "rb") as input_file:
-                self.results = pickle.load(input_file)
-            print("Stored image keypoints loaded")
-        except: pass
         
+        
+        if load_from_disk:
+            try:
+                with open("temp/feature_extr.pickle", "rb") as input_file:
+                    self.results = pickle.load(input_file)
+                print("Stored image keypoints loaded")
+            except: pass
+            
     
-    def extract(self, method, verbose = True):
+    def extract(self, image_paths, method, verbose = True):
 
         if method not in self.__supported_methods:
             raise Exception("Feature extraction method not supported. We support ", self.__supported_methods)
 
-        if self.results.get(method, None) is not None:
-            return self.results[method]
+        #if self.results.get(method, None) is not None:
+        #    return self.results[method]
 
         result = None
 
@@ -34,16 +36,16 @@ class FeatureExtractor:
             print("Extracting the image descriptors...", end = '')
 
         if method == 'orb':
-            result = self._orb_extract(self.image_paths)
+            result = self._orb_extract(image_paths)
             
         if method == 'sift':
-            result = self._sift_extract(self.image_paths)
+            result = self._sift_extract(image_paths)
 
         if method == 'rgb':
-            result = self._rgb_hists_extract(self.image_paths)
+            result = self._rgb_hists_extract(image_paths)
 
         if method == 'hsv':
-            result = self._hsv_hists_extract(self.image_paths)
+            result = self._hsv_hists_extract(image_paths)
 
         self.results[method] = result
 
@@ -51,7 +53,8 @@ class FeatureExtractor:
             os.makedirs("./temp/", exist_ok=True)
             with open("temp/feature_extr.pickle", "wb") as output_file:
                 pickle.dump(self.results, output_file , pickle.HIGHEST_PROTOCOL)
-            print("Stored features updated")
+                
+            print(" stored features updated... ", end = '')
         except: pass
         
         if verbose:

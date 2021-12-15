@@ -70,6 +70,6 @@ class DatasetGetter:
             dataframe = pd.DataFrame(groups.apply(lambda x: x.sample(groups.size().min()).reset_index(drop=True)))
 
         if shuffle:
-            dataframe = dataframe.sample(frac = 1)
+            dataframe = dataframe.sample(frac = 1).reset_index(drop = True)
         
         return dataframe
