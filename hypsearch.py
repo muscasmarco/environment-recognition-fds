@@ -248,7 +248,7 @@ def parameter_search():
                 with open(model_dir + "/all_results.pickle", "wb") as f:
                     pickle.dump(results_list, f, pickle.HIGHEST_PROTOCOL)
 
-                with open("log/" + folder + "/all.txt", "w") as info:
+                with open("log/" + folder + "/all.txt", "a") as info:
                     info.write("ACC: {}\t{}\n{}\n\n".format(last_answer.get('acc'), filename, pack))
 
                 with open("log/" + folder + "/all_ordered.txt", "w") as info:
