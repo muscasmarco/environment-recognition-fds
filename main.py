@@ -19,7 +19,7 @@ dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_dis
 
 
 ''' SPLITTING INTO TRAIN,TEST '''
-train_dataset, test_dataset = train_test_split(dataset, train_size = 0.8)
+train_dataset, test_dataset = train_test_split(dataset, train_size = 0.75, stratify = dataset.label.values)
 
 
 
@@ -30,10 +30,10 @@ parameters = {
     'extract_method': 'sift',
     
     'mapping_method': 'minibatch_kmeans',
-    'mapping_feature_size': 1000,
-    'mapping_batch_size': 256,
+    'mapping_feature_size': 2000,
+    'mapping_batch_size': 512,
     
-    'predict_method': 'log-regr',
+    'predict_method': 'svm',
     }
 
 ''' TRAINING '''
