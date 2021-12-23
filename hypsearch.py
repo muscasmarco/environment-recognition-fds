@@ -113,7 +113,7 @@ def parameter_search():
             
             test_accuracy = results['acc-score']
             
-            print("\n Validation accuracy: %.2f \n" % test_accuracy)
+            print("\n Test accuracy: %.2f \n" % test_accuracy)
 
             new_results_df_row = pd.DataFrame(data = [[pars, test_accuracy]], 
                                               columns = columns)
