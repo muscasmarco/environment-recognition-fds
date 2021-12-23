@@ -14,9 +14,6 @@ from sklearn.model_selection import train_test_split
 download_dataset = False # The repository does not contain the dataset, make sure to download it! (then set this to false)
 dataset = DatasetGetter(download = download_dataset).get_dataframe(load_from_disk = False, balanced = True, shuffle = True)
 
-dataset = dataset[:256]
-
-
 
 ''' SPLITTING INTO TRAIN,TEST '''
 train_dataset, test_dataset = train_test_split(dataset, train_size = 0.8, stratify = dataset.label.values)
@@ -29,10 +26,10 @@ parameters = {
     'extract_method': 'sift',
     
     'mapping_method': 'minibatch_kmeans',
-    'mapping_num_features': 256,
-    'mapping_batch_size': 128,
-    'mapping_max_iter':250,
-    'mapping_cumulative_bovw':False,
+    'mapping_num_features': 1024,
+    'mapping_batch_size': 256,
+    'mapping_max_iter': 200,
+    'mapping_cumulative_bovw': False,
     
     'predict_method': 'svm'    
     }
