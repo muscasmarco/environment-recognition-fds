@@ -6,12 +6,13 @@ import numpy as np
 class FeatureExtractor:
     __supported_methods = ['orb', 'sift', 'rgb', 'hsv']
 
-    def __init__(self):
+    def __init__(self, params):
+        self.params = params
         pass
     
-    def extract(self, image_paths, params, verbose = True):
+    def extract(self, image_paths, verbose = True):
         
-        method = params['method']
+        method = self.params['extract_method']
             
         if method not in self.__supported_methods:
             raise Exception("Feature extraction method not supported. We support ", self.__supported_methods)
@@ -22,25 +23,23 @@ class FeatureExtractor:
             print("Extracting the image descriptors...", end = '')
 
         if method == 'orb':
-            result = self._orb_extract(image_paths, params)
+            result = self._orb_extract(image_paths)
             
         if method == 'sift':
-            result = self._sift_extract(image_paths, params)
+            result = self._sift_extract(image_paths)
 
         if method == 'rgb':
-            result = self._rgb_hists_extract(image_paths, params)
+            result = self._rgb_hists_extract(image_paths)
 
         if method == 'hsv':
-            result = self._hsv_hists_extract(image_paths, params)
-
-        self.results[method] = result
+            result = self._hsv_hists_extract(image_paths)
 
         if verbose:
             print("Done.")
         
         return result
         
-    def _orb_extract(self, image_paths, params):
+    def _orb_extract(self, image_paths):
         pass
         X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For feature mapping of individual images
         X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering of features
@@ -62,7 +61,7 @@ class FeatureExtractor:
     
     
     
-    def _sift_extract(self, image_paths, params):
+    def _sift_extract(self, image_paths):
         pass
     
         X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For feature mapping of individual images
@@ -86,11 +85,13 @@ class FeatureExtractor:
     
     
     
-    def _rgb_hists_extract(self, image_paths, params):
+    def _rgb_hists_extract(self, image_paths):
         pass
         
         num_bins = 128
         normalize = True
+        
+        params = self.params
         
         if 'num_bins' in params.keys():
             num_bins = params['num_bins']
@@ -126,11 +127,13 @@ class FeatureExtractor:
         return X, X_all_hists
     
     
-    def _hsv_hists_extract(self, image_paths, params):
+    def _hsv_hists_extract(self, image_paths):
         pass
     
         num_bins = 128
         normalize = True
+        
+        params = self.params
         
         if 'num_bins' in params.keys():
             num_bins = params['num_bins']
