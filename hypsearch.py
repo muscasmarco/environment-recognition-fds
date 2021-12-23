@@ -24,7 +24,7 @@ def parameter_search():
     columns = ['params', 'acc']
     
     try:
-        results_df = pd.read_csv("results.csv")
+        results_df = pd.read_csv("raw-results.csv")
     except:
         print("Dataframe not found, creating one now.")
         results_df = pd.DataFrame(columns = columns)
