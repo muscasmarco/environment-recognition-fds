@@ -9,7 +9,7 @@ class Predictor:
     def __init__(self, params):
         
         self.available_models = {
-            "log-regr": LogisticRegression(),
+            "log-regr": LogisticRegression(max_iter = 2000),
             "ridge": RidgeClassifier(),
             "svm": SVC(),
             
