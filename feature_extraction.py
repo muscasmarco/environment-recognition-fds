@@ -1,34 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
-import pickle
-
 import cv2 as cv
 import numpy as np
 
 class FeatureExtractor:
     __supported_methods = ['orb', 'sift', 'rgb', 'hsv']
 
-    def __init__(self, image_paths, load_from_disk = False): # Methods are 'orb', 'sift'
-        self.image_paths = image_paths
-        self.results = {}
-        
-        
-        if load_from_disk:
-            try:
-                with open("temp/feature_extr.pickle", "rb") as input_file:
-                    self.results = pickle.load(input_file)
-                print("Stored image keypoints loaded")
-            except: pass
-            
+    def __init__(self):
+        pass
     
-    def extract(self, image_paths, method, verbose = True):
-
+    def extract(self, image_paths, params, verbose = True):
+        
+        method = params['method']
+            
         if method not in self.__supported_methods:
             raise Exception("Feature extraction method not supported. We support ", self.__supported_methods)
-
-        #if self.results.get(method, None) is not None:
-        #    return self.results[method]
 
         result = None
 
@@ -36,33 +22,25 @@ class FeatureExtractor:
             print("Extracting the image descriptors...", end = '')
 
         if method == 'orb':
-            result = self._orb_extract(image_paths)
+            result = self._orb_extract(image_paths, params)
             
         if method == 'sift':
-            result = self._sift_extract(image_paths)
+            result = self._sift_extract(image_paths, params)
 
         if method == 'rgb':
-            result = self._rgb_hists_extract(image_paths)
+            result = self._rgb_hists_extract(image_paths, params)
 
         if method == 'hsv':
-            result = self._hsv_hists_extract(image_paths)
+            result = self._hsv_hists_extract(image_paths, params)
 
         self.results[method] = result
 
-        try:
-            os.makedirs("./temp/", exist_ok=True)
-            with open("temp/feature_extr.pickle", "wb") as output_file:
-                pickle.dump(self.results, output_file , pickle.HIGHEST_PROTOCOL)
-                
-            print(" stored features updated... ", end = '')
-        except: pass
-        
         if verbose:
             print("Done.")
         
         return result
         
-    def _orb_extract(self, image_paths):
+    def _orb_extract(self, image_paths, params):
         pass
         X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For feature mapping of individual images
         X_all_descriptors = [] # [img1_d1, img1_d2, ..., img2_d1, img2_d2, ...] # For clustering of features
@@ -84,7 +62,7 @@ class FeatureExtractor:
     
     
     
-    def _sift_extract(self, image_paths):
+    def _sift_extract(self, image_paths, params):
         pass
     
         X = [] # List of image descriptors [[img1_d1, img1_d2, ...], [img2_d1, img2_d2, ...]] # For feature mapping of individual images
@@ -108,8 +86,16 @@ class FeatureExtractor:
     
     
     
-    def _rgb_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+    def _rgb_hists_extract(self, image_paths, params):
         pass
+        
+        num_bins = 128
+        normalize = True
+        
+        if 'num_bins' in params.keys():
+            num_bins = params['num_bins']
+        if 'normalize' in params.keys():
+            normalize = params['normalize']
             
         X = []
         X_all_hists = [] 
@@ -140,9 +126,17 @@ class FeatureExtractor:
         return X, X_all_hists
     
     
-    def _hsv_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+    def _hsv_hists_extract(self, image_paths, params):
         pass
     
+        num_bins = 128
+        normalize = True
+        
+        if 'num_bins' in params.keys():
+            num_bins = params['num_bins']
+        if 'normalize' in params.keys():
+            normalize = params['normalize']
+        
         X = []
         X_all_hists = [] 
     
