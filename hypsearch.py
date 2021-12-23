@@ -264,7 +264,7 @@ def parameter_search():
                                                   columns = columns)
                 results_df = results_df.append(new_results_df_row, ignore_index = True)
 
-                results_df.to_csv("results.csv", index = False, na_rep = "nan")
+                results_df.to_csv("raw-results.csv", index = False, na_rep = "nan")
                 
                 results_list.append(((last_answer.get('valid-acc'), pack), filename))
                 
@@ -296,4 +296,11 @@ def parameter_search():
     print("Finished parameter search in {:2f} minutes".format((time.time() - start_time) / 60))
 
 if __name__ == "__main__":
-    results_df = parameter_search()
+    df = parameter_search()
+    params = [eval(d) for d in df.params.values]
+    accuracies = df.acc.values
+    
+    test = pd.DataFrame.from_dict(params)
+    test['valid-acc'] = accuracies
+    
+    test.to_csv("final-results.csv")
