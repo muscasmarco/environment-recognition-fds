@@ -4,10 +4,12 @@ import traceback
 import sys, os
 import argparse
 import numpy as np
+import pandas as pd
 
 import ast
 
 from dataset_getter import DatasetGetter
+from executor import Executor
 from feature_extraction import FeatureExtractor
 from feature_mapping import FeatureMapper
 from prediction import Predictor
@@ -18,7 +20,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge
 from sklearn.svm import SVC
 
-
 class Grid:
     def __init__(self):
         self._grid = {}
@@ -26,7 +27,7 @@ class Grid:
         self._finished = False
         self._started = False
         self._len = 1
-
+       
     def __iter__(self):
         if not self._grid:
             raise ValueError("Cannot iterate over empty grid")
@@ -161,7 +162,7 @@ class Executor:
         self._map_features(pars)
         self._predict(pars)
         self._evaluate()
-
+        
         return {
             "valid-acc": self.acc_score
         }
@@ -171,11 +172,17 @@ class Executor:
         X_BoVW = self.feature_mapper.to_bag_of_visual_words(X)
         
         return self.predictor.predict(X_BoVW, pars['predict_method'])
-    
-
 def parameter_search():
     print("*** Parameter Search ***")
     start_time = time.time()
+ 
+    columns = ['params', 'acc']
+    
+    try:
+        results_df = pd.read_csv("results.csv")
+    except:
+        print("Dataframe not found, creating one now.")
+        results_df = pd.DataFrame(columns = columns)
 
     # parse command line arguments
     parser = argparse.ArgumentParser(description="Parser for Parameter Search arguments")
@@ -194,8 +201,8 @@ def parameter_search():
     # Setup Grid
     grid = Grid()
     # grid.add("extract_method", ["sift"])
-    grid.add("mapping_batch_size", [128, 256, 512])
-    grid.add("mapping_feature_size", [100, 200, 400])
+    grid.add("mapping_batch_size", [256, 512])
+    grid.add("mapping_feature_size", [512, 1024, 2048])
     grid.add("cumulative_BoVW", [False]) #[True, False])
     grid.add("predict_method", ["log-regr", "svm", "ridge"]) # lin-regr",
     print(grid)
@@ -252,7 +259,15 @@ def parameter_search():
                 
                 print("\n Validation accuracy: %.2f \n" % last_answer['valid-acc'])
                 
+                
+                new_results_df_row = pd.DataFrame(data = [[pars, last_answer['valid-acc']]], 
+                                                  columns = columns)
+                results_df = results_df.append(new_results_df_row, ignore_index = True)
+
+                results_df.to_csv("results.csv", index = False, na_rep = "nan")
+                
                 results_list.append(((last_answer.get('valid-acc'), pack), filename))
+                
 
                 with open(model_dir + "/all_results.pickle", "wb") as f:
                     pickle.dump(results_list, f, pickle.HIGHEST_PROTOCOL)
@@ -272,6 +287,8 @@ def parameter_search():
                 with open(error_log, "a") as error:
                     error.write(traceback.format_exc())
                 print('retry after exception ({})'.format(i+1))
+                
+    return results_df
 
     with open("log/" + folder + "/info.txt", "a") as info:
         info.write("Run finished\n")
@@ -279,4 +296,4 @@ def parameter_search():
     print("Finished parameter search in {:2f} minutes".format((time.time() - start_time) / 60))
 
 if __name__ == "__main__":
-    parameter_search()
+    results_df = parameter_search()
