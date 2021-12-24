@@ -1,39 +1,38 @@
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression, LinearRegression, RidgeClassifier
+from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.svm import SVC
 
-class Predictor:
-    def __init__(self, training_size, max_iterations=2000):
-        self.training_size = training_size
-        self.split = None
+from sklearn.linear_model import LogisticRegressionCV
 
+from sklearn.linear_model import RidgeCV
+
+class Predictor:
+    def __init__(self, params):
+        
         self.available_models = {
-            "log-regr": LogisticRegression(max_iter=max_iterations),
-            # "lin-regr": LinearRegression(),
+            "log-regr": LogisticRegression(max_iter = 2000),
             "ridge": RidgeClassifier(),
             "svm": SVC(),
+            
+            "cv-log-reg": LogisticRegressionCV(),
+            "cv-ridge": RidgeCV()
         }
         
-        self.trained_models = {}
+        self.method = params['predict_method']
+        self.model = self.available_models[self.method]
+        
 
-
-    def fit(self, X_BoVW, target, method):
-        model = self.available_models[method]
-        X_train, X_test, y_train, y_test = train_test_split(
-            X_BoVW,
-            target,
-            train_size=self.training_size,
-            stratify=target
-        )
-        model.fit(X_train, y_train)  # Fit the training data
+    def fit(self, X, y, verbose = True):
         
-        self.trained_models[method] = model
+        if verbose:
+            print("Training the predictor...", end = "")
         
-        return model.predict(X_test), y_test  # Make predictions
+        self.model.fit(X, y)  # Fit the training data
+        
+        if verbose:
+            print("Done.")
+        
+        return 
     
-    
-    def predict(self, X, method):
+    def predict(self, X):
         
-        model = self.trained_models[method]
-        
-        return model.predict(X)
+        return self.model.predict(X)

@@ -1,34 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import os
-import pickle
-
 import cv2 as cv
 import numpy as np
 
 class FeatureExtractor:
     __supported_methods = ['orb', 'sift', 'rgb', 'hsv']
 
-    def __init__(self, image_paths, load_from_disk = False): # Methods are 'orb', 'sift'
-        self.image_paths = image_paths
-        self.results = {}
-        
-        
-        if load_from_disk:
-            try:
-                with open("temp/feature_extr.pickle", "rb") as input_file:
-                    self.results = pickle.load(input_file)
-                print("Stored image keypoints loaded")
-            except: pass
-            
+    def __init__(self, params):
+        self.params = params
+        pass
     
-    def extract(self, image_paths, method, verbose = True):
-
+    def extract(self, image_paths, verbose = True):
+        
+        method = self.params['extract_method']
+            
         if method not in self.__supported_methods:
             raise Exception("Feature extraction method not supported. We support ", self.__supported_methods)
-
-        #if self.results.get(method, None) is not None:
-        #    return self.results[method]
 
         result = None
 
@@ -47,16 +34,6 @@ class FeatureExtractor:
         if method == 'hsv':
             result = self._hsv_hists_extract(image_paths)
 
-        self.results[method] = result
-
-        try:
-            os.makedirs("./temp/", exist_ok=True)
-            with open("temp/feature_extr.pickle", "wb") as output_file:
-                pickle.dump(self.results, output_file , pickle.HIGHEST_PROTOCOL)
-                
-            print(" stored features updated... ", end = '')
-        except: pass
-        
         if verbose:
             print("Done.")
         
@@ -108,8 +85,18 @@ class FeatureExtractor:
     
     
     
-    def _rgb_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+    def _rgb_hists_extract(self, image_paths):
         pass
+        
+        num_bins = 128
+        normalize = True
+        
+        params = self.params
+        
+        if 'num_bins' in params.keys():
+            num_bins = params['num_bins']
+        if 'normalize' in params.keys():
+            normalize = params['normalize']
             
         X = []
         X_all_hists = [] 
@@ -140,9 +127,19 @@ class FeatureExtractor:
         return X, X_all_hists
     
     
-    def _hsv_hists_extract(self, image_paths, num_bins = 128, normalize = True):
+    def _hsv_hists_extract(self, image_paths):
         pass
     
+        num_bins = 128
+        normalize = True
+        
+        params = self.params
+        
+        if 'num_bins' in params.keys():
+            num_bins = params['num_bins']
+        if 'normalize' in params.keys():
+            normalize = params['normalize']
+        
         X = []
         X_all_hists = [] 
     
