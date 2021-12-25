@@ -45,13 +45,13 @@ def parameter_search():
 
     # Setup Grid
     grid = Grid()
-    grid.add("extract_method", ["sift", "orb"])
+    grid.add("extract_method", ["sift" , "orb"])
     
-    grid.add("mapping_batch_size", [256, 512])
-    grid.add("mapping_num_features", [512, 1024, 2048])
+    grid.add("mapping_batch_size", [512])
+    grid.add("mapping_num_features", [1024, 2048])
     grid.add("mapping_dropout", [False, True]) #[True, False])
     grid.add("mapping_dropout_rate", [0.1, 0.2, 0.3, 0.4])
-    grid.add("predict_method", ["log-regr", "svm", "ridge", "cv-log-reg", "cv-ridge"]) # lin-regr",
+    grid.add("predict_method", ["log-reg", "svm", "ridge", "cv-log-reg", "cv-ridge"]) # lin-regr",
     
     print(grid)
     
