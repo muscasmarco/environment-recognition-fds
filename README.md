@@ -29,7 +29,8 @@ A bit of explaining could be helpful in recognizing what the various files do:
 - *hypersearch.py* - In this file we set the hyperparameter search using the classes defined in *grid.py* and *env_classifier.py*. 
 - *visualization.py* - A utils file for visualization of the confusion matrix, code was kindly provided (and edited to suit our needs) from [this site](https://blog.finxter.com/).
 
-There are also the .csv files that you can take a look at to see what we discovered during our many trials. We suggest taking a look at **final-results.csv**.
+There are also the .csv files in the `results` folder that you can take a look at to see what we discovered during our many trials. We suggest taking a look at **final-results.csv**.
 
 
 
+#### For a detailed summary of the project check out the `FINAL REPORT.pdf`
