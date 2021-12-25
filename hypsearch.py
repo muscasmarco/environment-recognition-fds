@@ -51,7 +51,7 @@ def parameter_search():
     grid.add("mapping_num_features", [512, 1024, 2048])
     grid.add("mapping_cumulative_bovw", [False]) #[True, False])
     
-    grid.add("predict_method", ["log-regr", "svm", "ridge"]) # lin-regr",
+    grid.add("predict_method", ["log-regr", "svm", "ridge", "cv-log-reg", "cv-ridge"]) # lin-regr",
     
     print(grid)
     

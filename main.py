@@ -27,8 +27,8 @@ parameters = {
     
     'mapping_method': 'minibatch_kmeans',
     'mapping_num_features': 1024,
-    'mapping_batch_size': 256,
-    'mapping_max_iter': 200,
+    'mapping_batch_size': 128,
+    'mapping_max_iter': 300,
     'mapping_cumulative_bovw': False,
     
     'predict_method': 'svm'    

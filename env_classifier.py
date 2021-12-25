@@ -5,6 +5,8 @@ from feature_extraction import FeatureExtractor
 from feature_mapping import FeatureMapper
 from prediction import Predictor
 from sklearn.metrics import accuracy_score
+from prediction import onehot_encode
+import numpy as np
 
 class EnvironmentClassifier:
     
@@ -52,6 +54,11 @@ class EnvironmentClassifier:
     def evaluate(self, X, y_true, verbose = True):
         
         y_pred = self.predict(X, verbose)
+
+        if 'ridge' in self.__predictor.method:
+            y_true = np.argmax(onehot_encode(y_true), axis = 1)
+            y_pred = np.argmax(y_pred, axis = 1)
+        
         return {'acc-score': accuracy_score(y_pred, y_true), 
                 'predictions': y_pred}
         
