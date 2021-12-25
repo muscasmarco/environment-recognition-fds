@@ -27,7 +27,7 @@ A bit of explaining could be helpful in recognizing what the various files do:
 - *prediction.py* - Finally, the predictor class where by setting the parameters, you can choose and easily train a classifier.
 
 - *hypersearch.py* - In this file we set the hyperparameter search using the classes defined in *grid.py* and *env_classifier.py*. 
-- *visualization.py* - A utils file for visualization of the confusion matrix, code was kindly provided (and edited to suit our needs) from [this site](blog.finxter.com).
+- *visualization.py* - A utils file for visualization of the confusion matrix, code was kindly provided (and edited to suit our needs) from [this site](https://blog.finxter.com/).
 
 There are also the .csv files that you can take a look at to see what we discovered during our many trials. We suggest taking a look at **final-results.csv**.
 
