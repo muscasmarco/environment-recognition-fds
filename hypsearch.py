@@ -147,13 +147,15 @@ def parameter_search():
     
 if __name__ == "__main__":
     df = parameter_search()
-    
-    
-    params = [d for d in df.params.values]
+        
+    df = pd.read_csv("raw-results.csv")
+        
+        
+    params = [eval(d) for d in df.params.values]
     accuracies = df.acc.values
     
     test = pd.DataFrame.from_dict(params)
     test['valid-acc'] = accuracies
     
-    test.to_csv("final-results.csv")
     
+    test.to_csv("final-results.csv", index = False)    
