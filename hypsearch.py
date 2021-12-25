@@ -155,7 +155,7 @@ if __name__ == "__main__":
     accuracies = df.acc.values
     
     test = pd.DataFrame.from_dict(params)
-    test['valid-acc'] = accuracies
-    
+    test['accuracy'] = accuracies
+    test = test.sort_values('accuracy', ascending = False)
     
     test.to_csv("final-results.csv", index = False)    

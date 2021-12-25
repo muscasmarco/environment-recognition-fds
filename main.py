@@ -29,10 +29,10 @@ parameters = {
     'mapping_num_features': 1024,
     'mapping_batch_size': 512,
     'mapping_max_iter': 300,
-    'mapping_dropout': True,
-    'mapping_dropout_rate': 0.1,
+    'mapping_dropout': False,
+    'mapping_dropout_rate': 0.0,
     
-    'predict_method': 'log-reg'    
+    'predict_method': 'svm'    
     }
 
 
