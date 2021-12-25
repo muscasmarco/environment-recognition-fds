@@ -5,6 +5,8 @@ from feature_extraction import FeatureExtractor
 from feature_mapping import FeatureMapper
 from prediction import Predictor
 from sklearn.metrics import accuracy_score
+from prediction import onehot_encode
+import numpy as np
 
 class EnvironmentClassifier:
     
@@ -31,7 +33,7 @@ class EnvironmentClassifier:
         
         # Mapping the feature to BoVW
         self.__feature_mapper.fit(X_all_descriptors)
-        X_BoVW = self.__feature_mapper.predict(X_descriptors)
+        X_BoVW = self.__feature_mapper.predict(X_descriptors, training = True)
         
         
         # Fit of the classification model
@@ -44,7 +46,7 @@ class EnvironmentClassifier:
     def predict(self, X, verbose = True):
         
         X_descriptors , _  = self.__feature_extractor.extract(X, verbose = verbose)
-        X_BoVW = self.__feature_mapper.predict(X_descriptors)
+        X_BoVW = self.__feature_mapper.predict(X_descriptors, training = False) # Deactivate any dropout
         return self.__predictor.predict(X_BoVW)
     
     
@@ -52,6 +54,11 @@ class EnvironmentClassifier:
     def evaluate(self, X, y_true, verbose = True):
         
         y_pred = self.predict(X, verbose)
+
+        if 'ridge' in self.__predictor.method:
+            y_true = np.argmax(onehot_encode(y_true), axis = 1)
+            y_pred = np.argmax(y_pred, axis = 1)
+        
         return {'acc-score': accuracy_score(y_pred, y_true), 
                 'predictions': y_pred}
         

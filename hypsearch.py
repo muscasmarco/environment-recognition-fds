@@ -49,14 +49,13 @@ def parameter_search():
     
     grid.add("mapping_batch_size", [256, 512])
     grid.add("mapping_num_features", [512, 1024, 2048])
-    grid.add("mapping_cumulative_bovw", [False]) #[True, False])
-    
-    grid.add("predict_method", ["log-regr", "svm", "ridge"]) # lin-regr",
+    grid.add("mapping_dropout", [False, True]) #[True, False])
+    grid.add("mapping_dropout_rate", [0.1, 0.2, 0.3, 0.4])
+    grid.add("predict_method", ["log-regr", "svm", "ridge", "cv-log-reg", "cv-ridge"]) # lin-regr",
     
     print(grid)
     
     print("Number of combinations: " + str(len(grid)))
-    
     
 
     print("-- Loading Data --")
@@ -95,9 +94,6 @@ def parameter_search():
         try:
             print("Iteration code: " + filename)
 
-            
-    
-            
             env_classifier = EnvironmentClassifier(pars)
             
             env_classifier.fit(train_dataset.image_path, 
