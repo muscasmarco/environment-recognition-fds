@@ -27,11 +27,12 @@ parameters = {
     
     'mapping_method': 'minibatch_kmeans',
     'mapping_num_features': 1024,
-    'mapping_batch_size': 128,
+    'mapping_batch_size': 512,
     'mapping_max_iter': 300,
-    'mapping_cumulative_bovw': False,
+    'mapping_dropout': True,
+    'mapping_dropout_rate': 0.1,
     
-    'predict_method': 'svm'    
+    'predict_method': 'log-reg'    
     }
 
 

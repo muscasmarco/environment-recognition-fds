@@ -33,7 +33,7 @@ class EnvironmentClassifier:
         
         # Mapping the feature to BoVW
         self.__feature_mapper.fit(X_all_descriptors)
-        X_BoVW = self.__feature_mapper.predict(X_descriptors)
+        X_BoVW = self.__feature_mapper.predict(X_descriptors, training = True)
         
         
         # Fit of the classification model
@@ -46,7 +46,7 @@ class EnvironmentClassifier:
     def predict(self, X, verbose = True):
         
         X_descriptors , _  = self.__feature_extractor.extract(X, verbose = verbose)
-        X_BoVW = self.__feature_mapper.predict(X_descriptors)
+        X_BoVW = self.__feature_mapper.predict(X_descriptors, training = False) # Deactivate any dropout
         return self.__predictor.predict(X_BoVW)
     
     
